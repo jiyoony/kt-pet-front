@@ -1,0 +1,33 @@
+{
+  "extends": "@tsconfig/node22/tsconfig.json",  // node22 설정 확장
+  "include": [
+    "vite.config.*",
+    "vitest.config.*",
+    "cypress.config.*",
+    "nightwatch.conf.*",
+    "playwright.config.*",
+    "eslint.config.*",
+    "src/**/*.ts",  // TS 파일 포함
+    "src/**/*.d.ts", // d.ts 파일 포함
+    "src/**/*.tsx",  // JSX/TSX 파일 포함
+    "src/**/*.vue"   // Vue 파일 포함
+  ],
+  "compilerOptions": {
+    "baseUrl": "./src",  // 상대 경로 기준을 src로 설정
+    "paths": {
+      "@/*": ["*"]  // @로 src 폴더에 접근
+    },
+    "noEmit": true,  // 코드 변환하지 않음 (타입 체크만)
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo", // 빌드 정보
+    "incremental": true,  // 증분 빌드 사용
+    "module": "ESNext",  // ES 모듈
+    "moduleResolution": "Bundler",  // 번들러 방식 모듈 해석
+    "types": ["vue"],  // Node 타입 포함
+    "esModuleInterop": true,  // ES 모듈 호환
+    "resolveJsonModule": true,  // JSON 파일 모듈화
+    "allowSyntheticDefaultImports": true,  // 기본 내보내기 호환
+    "jsx": "preserve",  // JSX 코드 유지
+    "strict": true,  // 엄격한 타입 체크
+    "skipLibCheck": true  // 라이브러리 타입 체크 건너뛰기
+  }
+}
