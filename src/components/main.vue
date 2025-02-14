@@ -203,13 +203,21 @@ body {
 /* 히어로 섹션 */
 .hero {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 5rem 1rem;
+  padding: 6rem 1rem 8rem 1rem;
   text-align: center;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
 }
 
 .hero-content {
   max-width: 800px;
   margin: 0 auto;
+  padding: 1.5rem;
+  position: relative;
+  z-index: 2;
 }
 
 .hero h1 {
@@ -220,19 +228,20 @@ body {
 }
 
 .hero p {
-  font-size: 1.25rem;
-  margin-bottom: 2.5rem;
+  font-size: 1.5rem;
+  margin-bottom: 3rem;
   color: #666;
   animation: fadeInUp 1s ease;
 }
 
 .hero input {
-  padding: 1rem 1.5rem;
+  padding: 1.2rem 2rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   border: 2px solid #ddd;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  margin-top: 2rem;
   transition: var(--transition);
   animation: fadeInUp 1.2s ease;
 }
@@ -288,22 +297,34 @@ body {
 /* CTA 섹션 */
 .cta {
   background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
-  padding: 5rem 1rem;
+  padding: 6rem 1rem;
   text-align: center;
+  color: white;
+  margin-top: 3rem;
+}
+
+.cta h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
   color: white;
 }
 
+.cta p {
+  font-size: 1.2rem;
+  margin-bottom: 2.5rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
 .cta-button {
+  padding: 1rem 2.5rem;
+  font-size: 1.2rem;
   background: white;
   color: var(--primary-color);
-  padding: 1rem 2rem;
   border: none;
   border-radius: 8px;
-  font-weight: bold;
-  font-size: 1.1rem;
   cursor: pointer;
   transition: var(--transition);
-  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 .cta-button:hover {

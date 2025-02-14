@@ -50,6 +50,8 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 import Header from '@/components/common/Header.vue';
 
+declare const window: Window & typeof globalThis;
+
 export default defineComponent({
   name: 'Login',
   emits: ['login-success'],
@@ -78,18 +80,8 @@ export default defineComponent({
         });
 
         if (response.status === 200) {
-          // 로컬 스토리지에 이메일 저장
           localStorage.setItem('userEmail', email.value);
-          
-          // 로그인 성공 이벤트 발생
           emit('login-success');
-          
-          // 메인 페이지로 이동하기 전에 헤더 상태 갱신
-          if (headerRef.value) {
-            headerRef.value.checkLoginStatus();
-          }
-          
-          // 메인 페이지로 이동
           await router.push('/main');
         }
       } catch (error) {

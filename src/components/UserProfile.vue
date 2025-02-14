@@ -224,9 +224,15 @@ export default {
       user: {
         name: '',
         email: '',
-        phone: ''
+        phone: '',
+        availablePetTypes: []
       },
-      editedUser: {},
+      editedUser: {
+        email: '',
+        name: '',
+        phone: '',
+        availablePetTypes: []
+      },
       isEditing: false,
       showChangePasswordModal: false,
       newPassword: '',
@@ -238,7 +244,7 @@ export default {
         endAt: '',
         location: '',
       },
-      petTypes: ['강아지', '고양이', '토끼', '햄스터', '새', '고슴도치'],
+      petTypes: ['소형견', '중형견', '대형견', '고양이', '새', '토끼'],
       selectedPetTypes: [],
       isPetsitter: false,
       isPetsitterEditing: false,
@@ -264,17 +270,21 @@ export default {
   methods: {
     async fetchUserInfo() {
       try {
-        const response = await axios.get('http://localhost:8080/api/v1/user/info');
+        const response = await axios.get('http://localhost:8080/api/v1/user/info', {
+          withCredentials: true
+        });
         if (response.data) {
           this.user = response.data;
-          this.editedUser = { ...response.data };
+          // 문자열로 된 availablePetTypes를 배열로 변환
+          if (typeof this.user.availablePetTypes === 'string') {
+            this.user.availablePetTypes = this.user.availablePetTypes.split(',').map(type => type.trim());
+          }
+          this.editedUser = { ...this.user };
         }
       } catch (error) {
         console.error('사용자 정보 조회 실패:', error);
-        if (error.response && error.response.status === 403) {
+        if (error.response?.status === 403) {
           this.$router.push('/login');
-        } else {
-          alert('사용자 정보를 불러오는데 실패했습니다.');
         }
       }
     },
@@ -326,6 +336,11 @@ export default {
     },
     async registerAsPetsitter() {
       try {
+        // 사용자가 이미 가지고 있는 돌봄 가능 동물 정보를 기본 선택으로 설정
+        if (!this.selectedPetTypes.length && this.user.availablePetTypes) {
+          this.selectedPetTypes = this.user.availablePetTypes;
+        }
+
         const formattedPetTypes = this.selectedPetTypes.join(',');
         
         const response = await axios.post('http://localhost:8080/api/v1/petsitter', {
@@ -747,5 +762,23 @@ export default {
   margin-bottom: 8px;
   font-size: 14px;
   color: #495057;
+}
+
+.checkbox-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  margin-right: 0.5rem;
 }
 </style>
