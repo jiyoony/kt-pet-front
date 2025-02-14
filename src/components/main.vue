@@ -1,26 +1,5 @@
 <template>
   <div id="app">
-    <header class="header">
-      <nav class="nav">
-        <div class="logo">
-          <img src="@/assets/pet-logo.png" alt="Logo">
-          <span class="black-text">펫시터 찾기</span>
-        </div>
-        <div class="nav-buttons">
-          <!-- 로그인 상태가 아닐 때 -->
-          <template v-if="!isLoggedIn">
-            <button class="login" @click="goToLogin">로그인</button>
-            <button class="signup" @click="goToSignup">회원가입</button>
-          </template>
-          <!-- 로그인 상태일 때 -->
-          <div v-else class="user-info">
-            <span class="user-email" @click="goToProfile">{{ userEmail }}</span>
-            <i class="fas fa-user user-icon" @click="goToProfile"></i>
-            <button class="logout" @click="handleLogout">로그아웃</button>
-          </div>
-        </div>
-      </nav>
-    </header>
 
     <main>
       <section class="hero">
@@ -50,13 +29,10 @@
       <section class="cta">
         <h2 class="black-text">지금 바로 펫시터 찾기를 시작하세요</h2>
         <p class="black-text">여러분의 소중한 반려동물에게 최고의 돌봄을 선사하세요</p>
-        <button class="cta-button">펫시터 찾기</button>
+        <button class="cta-button" @click="goToPetSitterList">펫시터 찾기</button>
       </section>
     </main>
 
-    <footer class="footer">
-      <p>&copy; 2025 펫시터 찾기. All rights reserved.</p>
-    </footer>
   </div>
 </template>
 
@@ -116,6 +92,9 @@ export default {
     },
     goToProfile() {
       this.$router.push('/user-profile');
+    },
+    goToPetSitterList() {
+      this.$router.push('/pet-sitter-list');
     }
   }
 };

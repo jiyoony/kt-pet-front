@@ -48,43 +48,53 @@
 import { defineComponent, ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import Header from '@/components/common/Header.vue';
 
 export default defineComponent({
   name: 'Login',
-  methods: {
-    goToSignup() {
-      this.$router.push('/signup');
-    },
-    goToMain() {
-      this.$router.push('/main');
-    }
-  },
-  setup() {
+  emits: ['login-success'],
+  setup(props, { emit }) {
     const email = ref('');
     const password = ref('');
     const rememberMe = ref(false);
     const router = useRouter();
+    const headerRef = ref(null);
+
+    const goToSignup = () => {
+      router.push('/signup');
+    };
+
+    const goToMain = () => {
+      router.push('/main');
+    };
 
     const handleLogin = async () => {
       try {
         const response = await axios.post('http://localhost:8080/api/v1/user/login', {
           email: email.value,
           password: password.value
+        }, {
+          withCredentials: true
         });
 
         if (response.status === 200) {
-          console.log('로그인 성공:', response.data);
-          
-          // 토큰과 이메일 저장
-          localStorage.setItem('token', response.data.token);
+          // 로컬 스토리지에 이메일 저장
           localStorage.setItem('userEmail', email.value);
           
+          // 로그인 성공 이벤트 발생
+          emit('login-success');
+          
+          // 메인 페이지로 이동하기 전에 헤더 상태 갱신
+          if (headerRef.value) {
+            headerRef.value.checkLoginStatus();
+          }
+          
           // 메인 페이지로 이동
-          router.push('/main');
+          await router.push('/main');
         }
       } catch (error) {
         console.error('로그인 실패:', error);
-        alert('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+        window.alert('로그인에 실패했습니다.');
       }
     };
 
@@ -92,7 +102,10 @@ export default defineComponent({
       email,
       password,
       rememberMe,
-      handleLogin
+      handleLogin,
+      goToSignup,
+      goToMain,
+      headerRef
     };
   }
 });
@@ -103,9 +116,9 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f4f4f9;
+  min-height: calc(100vh - 80px); /* 헤더 높이만큼 뺀 높이 */
   padding: 2rem;
+  background-color: #f4f4f9;
 }
 
 .form-container {
@@ -139,19 +152,14 @@ export default defineComponent({
 .title {
   font-size: 32px;
   font-weight: 700;
-  color: #2c3e50;
+  color: #333;
   margin: 0;
-  background: linear-gradient(120deg, #007BFF, #00a1ff);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .subtitle {
   font-size: 16px;
-  color: #666;
+  color: #333;
   margin: 0;
-  font-weight: 500;
 }
 
 .form-group {
@@ -160,66 +168,43 @@ export default defineComponent({
 
 .form-group label {
   display: block;
-  font-size: 15px;
-  color: #555;
-  margin-bottom: 0.8rem;
-  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #333;
 }
 
 .form-group input {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #e1e1e1;
-  border-radius: 8px;
-  font-size: 15px;
-  transition: all 0.3s ease;
-}
-
-.form-group input:focus {
-  border-color: #007BFF;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  color: #333;
 }
 
 .remember-me {
   display: flex;
   align-items: center;
-  margin-bottom: 2rem;
-}
-
-.remember-me input {
-  margin-right: 0.8rem;
-  width: 16px;
-  height: 16px;
-}
-
-.remember-me label {
-  color: #555;
-  font-size: 14px;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  color: #333;
 }
 
 .submit-btn {
   width: 100%;
-  padding: 14px;
-  background-color: #007BFF;
+  padding: 0.75rem;
+  background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .submit-btn:hover {
   background-color: #0056b3;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
 }
 
 .divider {
-  text-align: center;
   margin: 2rem 0;
+  text-align: center;
   position: relative;
 }
 
@@ -230,7 +215,7 @@ export default defineComponent({
   top: 50%;
   width: 45%;
   height: 1px;
-  background-color: #e1e1e1;
+  background-color: #ddd;
 }
 
 .divider::before {
@@ -242,57 +227,38 @@ export default defineComponent({
 }
 
 .divider span {
-  background-color: #fff;
+  background-color: white;
   padding: 0 1rem;
-  color: #888;
-  font-size: 14px;
+  color: #333;
 }
 
 .additional-links {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
+  text-align: center;
 }
 
 .link-btn {
   width: 100%;
-  padding: 12px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
   background-color: #f8f9fa;
-  border: 2px solid #e1e1e1;
-  border-radius: 8px;
-  color: #555;
-  font-size: 15px;
-  font-weight: 500;
+  border: 1px solid #ddd;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.link-btn:hover {
-  background-color: #e9ecef;
-  transform: translateY(-2px);
 }
 
 .auth-links {
   display: flex;
+  justify-content: center;
   gap: 1rem;
-  align-items: center;
 }
 
 .link {
-  color: #007BFF;
-  font-size: 14px;
+  color: #333;
   text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.link:hover {
-  color: #0056b3;
-  text-decoration: underline;
 }
 
 .separator {
-  color: #e1e1e1;
+  color: #333;
 }
 
 @media (max-width: 768px) {

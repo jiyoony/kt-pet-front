@@ -52,6 +52,8 @@ import { defineComponent, ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
 
+declare const alert: (message: string) => void;
+
 export default defineComponent({
   name: 'Signup',
   methods: {
@@ -119,9 +121,9 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
-  background-color: #f4f4f9;
   padding: 2rem;
+  min-height: calc(100vh - 160px); /* 헤더와 푸터 높이를 고려한 수정 */
+  background-color: #f4f4f9;
 }
 
 .form-container {
