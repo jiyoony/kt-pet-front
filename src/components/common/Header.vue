@@ -13,7 +13,7 @@
         </template>
         <!-- 로그인 상태일 때 -->
         <div v-else class="user-info">
-          <span class="user-email">{{ userEmail }}</span>
+          <span class="user-email" @click="goToProfile">{{ userEmail }}</span>
           <button class="mypage" @click="goToProfile">마이페이지</button>
           <button class="logout" @click="handleLogout">로그아웃</button>
         </div>

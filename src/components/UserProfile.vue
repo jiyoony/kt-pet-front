@@ -58,6 +58,7 @@
           <div></div>
           <div>
             <button v-if="!isPetsitterEditing" class="edit-btn" @click="startPetsitterEdit">수정</button>
+            <button v-if="!isPetsitterEditing" class="delete-btn" @click="deletePetsitter" style="margin-left: 10px;">삭제</button>
             <div v-else class="edit-buttons">
               <button class="save-btn" @click="savePetsitterEdit">저장</button>
               <button class="cancel-btn" @click="cancelPetsitterEdit">취소</button>
@@ -77,11 +78,19 @@
             <label>활동 시간</label>
             <div class="info-field">
               <template v-if="isPetsitterEditing">
-                <input v-model="editedPetsitterInfo.startAt" type="datetime-local" class="form-input">
-                ~
-                <input v-model="editedPetsitterInfo.endAt" type="datetime-local" class="form-input">
+                <input 
+                  v-model="editedPetsitterInfo.startAt" 
+                  type="datetime-local" 
+                  class="form-input"
+                >
+                <span class="time-separator">~</span>
+                <input 
+                  v-model="editedPetsitterInfo.endAt" 
+                  type="datetime-local" 
+                  class="form-input"
+                >
               </template>
-              <span v-else>
+              <span v-else class="time-display">
                 {{ formatDateTime(petsitterInfo.startAt) }} ~ {{ formatDateTime(petsitterInfo.endAt) }}
               </span>
             </div>
@@ -90,19 +99,23 @@
           <div class="form-group">
             <label>돌봄 가능한 동물</label>
             <div class="info-field">
-              <div v-if="isPetsitterEditing" class="pet-types-container">
-                <label v-for="type in petTypes" :key="type" class="pet-type-checkbox">
-                  <input 
-                    type="checkbox" 
-                    :value="type"
-                    v-model="editedPetsitterInfo.selectedPetTypes"
-                  >
-                  {{ type }}
-                </label>
+              <div class="pet-types-container">
+                <template v-if="isPetsitterEditing">
+                  <label v-for="type in petTypes" :key="type" class="pet-type-checkbox">
+                    <input 
+                      type="checkbox" 
+                      :value="type"
+                      v-model="editedPetsitterInfo.selectedPetTypes"
+                    >
+                    {{ type }}
+                  </label>
+                </template>
+                <template v-else>
+                  <span v-for="type in getPetTypes" :key="type" class="pet-type-tag">
+                    {{ type }}
+                  </span>
+                </template>
               </div>
-              <span v-else v-for="type in getPetTypes" :key="type" class="pet-type-tag">
-                {{ type }}
-              </span>
             </div>
           </div>
 
@@ -343,7 +356,7 @@ export default {
 
         const formattedPetTypes = this.selectedPetTypes.join(',');
         
-        const response = await axios.post('http://localhost:8080/api/v1/petsitter', {
+        const response = await axios.post('http://localhost:8080/api/v1/petsitters', {
           price: this.petsitterInfo.price,
           startAt: new Date(this.petsitterInfo.startAt).toISOString(),
           endAt: new Date(this.petsitterInfo.endAt).toISOString(),
@@ -354,6 +367,7 @@ export default {
         if (response.status === 200) {
           alert('펫시터 등록이 완료되었습니다.');
           this.showPetsitterModal = false;
+          this.isPetsitter = true; // 펫시터 등록 후 상태 업데이트
           // 입력 필드 초기화
           this.petsitterInfo = {
             price: 0,
@@ -362,6 +376,7 @@ export default {
             location: ''
           };
           this.selectedPetTypes = [];
+          await this.fetchPetsitterInfo(); // 등록 후 펫시터 정보 다시 가져오기
         }
       } catch (error) {
         console.error('펫시터 등록 실패:', error);
@@ -399,7 +414,7 @@ export default {
     },
     async savePetsitterEdit() {
       try {
-        const response = await axios.put('http://localhost:8080/api/v1/petsitter', {
+        const response = await axios.put('http://localhost:8080/api/v1/petsitters', {
           price: this.editedPetsitterInfo.price,
           startAt: new Date(this.editedPetsitterInfo.startAt).toISOString(),
           endAt: new Date(this.editedPetsitterInfo.endAt).toISOString(),
@@ -427,7 +442,19 @@ export default {
         selectedPetTypes: this.petsitterInfo.availablePetTypes ? 
           this.petsitterInfo.availablePetTypes.split(',') : []
       };
-    }
+    },
+    async deletePetsitter() {
+      try {
+        await axios.delete('http://localhost:8080/api/v1/petsitters', {
+          withCredentials: true
+        });
+        alert('펫시터 정보가 삭제되었습니다.');
+        this.isPetsitter = false; // 펫시터 정보 삭제 후 상태 업데이트
+      } catch (error) {
+        console.error('펫시터 삭제 실패:', error);
+        alert('펫시터 삭제에 실패했습니다.');
+      }
+    },
   }
 }
 </script>
@@ -436,7 +463,7 @@ export default {
 .container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   min-height: 100vh;
   background-color: #f4f4f9;
   padding: 2rem;
@@ -458,13 +485,21 @@ export default {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   padding: 3rem;
   margin: 0 auto;
+  height: fit-content;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
 }
 
 .petsitter-info {
+  flex: 1;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   padding: 3rem;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
 }
 
 .title {
@@ -488,11 +523,11 @@ export default {
 }
 
 .edit-button-container {
-  display: none; /* 기존 컨테이너 숨김 */
+  display: none;
 }
 
 .form-group {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-group label {
@@ -500,29 +535,38 @@ export default {
   font-size: 16px;
   font-weight: 600;
   color: #222;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.5rem;
 }
 
 .info-field {
   color: #333;
   font-size: 16px;
-  padding: 12px 0;
+  padding: 8px 0;
   border-bottom: 1px solid #eee;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.info-field input {
+.info-field input,
+.info-field select,
+.info-field span {
   width: 100%;
-  padding: 12px;
-  border: 2px solid #ddd;
-  border-radius: 6px;
+  padding: 8px;
   font-size: 16px;
   color: #333;
-  transition: border-color 0.3s ease;
+  line-height: 1.5;
+  min-height: 40px;
 }
 
-.info-field input:focus {
-  border-color: #007BFF;
-  outline: none;
+.info-field input,
+.info-field select {
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  transition: border-color 0.3s ease;
+  background-color: white;
 }
 
 .edit-btn {
@@ -581,7 +625,7 @@ export default {
 }
 
 .register-petsitter-btn {
-  padding: 10px 24px; /* 수정 버튼과 동일한 크기로 변경 */
+  padding: 10px 24px;
   background-color: #4CAF50;
   color: white;
   border: none;
@@ -599,22 +643,31 @@ export default {
 }
 
 .pet-types-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 10px;
-  margin-top: 10px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  padding: 4px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
 }
 
+.pet-type-tag,
 .pet-type-checkbox {
-  display: flex;
+  font-size: 10px;
+  padding: 2px 6px;
+  margin: 0;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
+  min-height: 20px;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  border-radius: 3px;
 }
 
 .pet-type-checkbox input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
+  margin: 0 2px 0 0;
+  width: 7px;
+  height: 7px;
 }
 
 .modal-overlay {
@@ -659,7 +712,7 @@ export default {
   flex: 1;
   overflow-y: auto;
   padding: 0 1rem;
-  margin: -1rem 0;  /* 패딩 상쇄 */
+  margin: -1rem 0;
 }
 
 .modal-buttons {
@@ -675,7 +728,6 @@ export default {
   border-top: 1px solid #eee;
 }
 
-/* 스크롤바 스타일링 */
 .modal-content::-webkit-scrollbar {
   width: 8px;
 }
@@ -739,7 +791,6 @@ export default {
   outline: none;
 }
 
-/* 반응형 디자인 */
 @media (max-width: 1200px) {
   .profile-container {
     flex-direction: column;
@@ -753,32 +804,63 @@ export default {
   }
 }
 
-.pet-type-tag {
-  display: inline-block;
-  background-color: #e9ecef;
-  padding: 4px 12px;
-  border-radius: 20px;
-  margin-right: 8px;
-  margin-bottom: 8px;
-  font-size: 14px;
-  color: #495057;
-}
-
-.checkbox-group {
+.profile-content {
+  flex: 1;
   display: flex;
-  gap: 1rem;
-  margin-top: 0.5rem;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-.checkbox-group label {
+/* 활동 시간 입력 필드 스타일 수정 */
+.info-field {
+  color: #333;
+  font-size: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  min-height: 40px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
+  flex-wrap: wrap; /* 줄바꿈 허용 */
+  gap: 8px; /* 요소 간 간격 */
 }
 
-.checkbox-group input[type="checkbox"] {
-  width: auto;
-  margin-right: 0.5rem;
+/* 시간 입력 필드 스타일 */
+.info-field input[type="datetime-local"] {
+  width: calc(50% - 15px); /* 너비 조정 */
+  padding: 6px;
+  font-size: 14px;
+  min-height: 32px;
+}
+
+/* 구분자 스타일 */
+.time-separator {
+  font-size: 14px;
+  color: #666;
+  margin: 0 4px;
+}
+
+/* 시간 표시 스팬 스타일 */
+.time-display {
+  font-size: 14px;
+  color: #333;
+}
+
+.delete-btn {
+  padding: 10px 24px;
+  background-color: #dc3545; /* 빨간색 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-left: 10px; /* 간격 추가 */
+}
+
+.delete-btn:hover {
+  background-color: #c82333; /* 어두운 빨간색 */
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 </style>
