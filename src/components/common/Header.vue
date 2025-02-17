@@ -33,8 +33,8 @@ export default {
   setup() {
     const userEmail = ref(localStorage.getItem('userEmail'));
     const isLoggedIn = ref(!!userEmail.value);
-    const isAdmin = ref(localStorage.getItem('userRole') === 'admin');
-
+    const isAdmin = ref(localStorage.getItem('userRole') == 'admin');
+    console.log(isAdmin);
     const logout = () => {
       localStorage.removeItem('token');
       localStorage.removeItem('userEmail');

@@ -291,6 +291,7 @@ export default {
   methods: {
     async fetchUserInfo() {
       try {
+        console.log('fetchUserInfo 호출');
         const response = await axios.get('http://localhost:8080/api/v1/user/info', {
           withCredentials: true
         });
@@ -299,6 +300,8 @@ export default {
           this.editedUser = { ...this.user };
           this.isPetsitter = this.user.role === 'petsitter';
         }
+
+        console.log('현재 사용자 역할:', this.user.role);
       } catch (error) {
         console.error('사용자 정보 조회 실패:', error);
         if (error.response?.status === 403) {

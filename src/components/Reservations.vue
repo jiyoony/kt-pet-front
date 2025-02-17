@@ -29,20 +29,37 @@ export default {
     };
   },
   mounted() {
-    this.fetchReservations();
+    this.fetchUserInfo(); // 사용자 정보 가져오기
   },
   methods: {
+    async fetchUserInfo() {
+      try {
+        const response = await axios.get('http://localhost:8080/api/v1/user/info', {
+          withCredentials: true
+        });
+        // 사용자 역할을 Vuex 스토어에 저장
+        this.$store.commit('setUserRole', response.data.role);
+        // 예약 목록 가져오기
+        this.fetchReservations();
+      } catch (error) {
+        console.error('사용자 정보 조회 실패:', error);
+        this.error = '사용자 정보를 가져오는 데 실패했습니다.';
+        this.loading = false;
+      }
+    },
     async fetchReservations() {
       try {
+        console.log('fetchUserInfo 실행됨'); // 여기에 로그 추가
+
         const userRole = this.$store.state.userRole; // 사용자 역할 가져오기
+        console.log('User role:', userRole); // 사용자 역할 로그
         let url = '';
 
         if (userRole === 'petsitter') {
           url = 'http://localhost:8080/api/v1/reservations/petsitter'; // 펫시터 역할일 때
         } else {
-          url = 'http://localhost:8080/api/v1/reservations'; // 일반 사용자 역할일 때
+          url = 'http://localhost:8080/api/v1/reservations/my'; // 일반 사용자 역할일 때
         }
-        console.log(`Fetching reservations from: ${url}`); // 추가된 로그
 
         const response = await axios.get(url, {
           withCredentials: true
@@ -53,6 +70,16 @@ export default {
         console.error(err);
       } finally {
         this.loading = false;
+      }
+    },
+    async fetchPetsitterInfo() {
+      try {
+        const response = await axios.get('http://localhost:8080/api/v1/petsitter/info', {
+          withCredentials: true
+        });
+        // 응답 처리
+      } catch (error) {
+        console.error('펫시터 정보 조회 실패:', error);
       }
     }
   }

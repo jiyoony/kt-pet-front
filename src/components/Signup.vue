@@ -76,6 +76,30 @@ export default defineComponent({
     },
     goToMain() {
       this.$router.push('/main');
+    },
+    async fetchReservations() {
+      try {
+        const userRole = this.$store.state.userRole; // 사용자 역할 가져오기
+        let url = '';
+
+        if (userRole === 'petsitter') {
+          url = 'http://localhost:8080/api/v1/reservations/petsitter'; // 펫시터 역할일 때
+        } else {
+          url = 'http://localhost:8080/api/v1/reservations'; // 일반 사용자 역할일 때
+        }
+        console.log(`Fetching reservations from: ${url}`); // 추가된 로그
+
+        const response = await axios.get(url, {
+          withCredentials: true
+        });
+        console.log('Response data:', response.data); // 응답 데이터 로그
+        this.reservations = response.data;
+      } catch (err) {
+        this.error = '예약 정보를 가져오는 데 실패했습니다.';
+        console.error(err);
+      } finally {
+        this.loading = false;
+      }
     }
   },
   setup() {
@@ -122,6 +146,9 @@ export default defineComponent({
 
             // 5. 메인 페이지로 이동
             router.push('/main');
+
+            // 로그인 성공 후
+            this.$store.commit('setUserRole', loginResponse.data.role); // 사용자 역할 설정
           }
         }
       } catch (error) {
