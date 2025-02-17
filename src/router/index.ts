@@ -4,7 +4,7 @@ import Main from '@/components/main.vue'
 import Signup from '@/components/Signup.vue'
 import UserProfile from '@/components/UserProfile.vue'
 import PetSitterList from '@/components/PetSitterList.vue'
-
+import AnimalCodeManager from '@/components/AnimalCodeManager.vue'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
@@ -34,6 +34,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/pet-sitter-list',
     name: 'PetSitterList',
     component: PetSitterList
+  },
+  {
+    path: '/animal-code-manager',
+    name: 'AnimalCodeManager',
+    component: AnimalCodeManager
   }
 ]
 

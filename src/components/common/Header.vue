@@ -18,6 +18,7 @@
           <button class="logout" @click="handleLogout">로그아웃</button>
         </div>
       </div>
+      <router-link to="/animal-code-manager">동물 코드 관리</router-link>
     </nav>
   </header>
 </template>

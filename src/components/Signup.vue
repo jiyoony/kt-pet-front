@@ -11,6 +11,20 @@
       
       <form class="signup-form" @submit.prevent="handleSignup">
         <div class="form-group">
+          <label for="userType">회원 유형</label>
+          <div class="user-type-options">
+            <label class="user-type-label">
+              <input type="radio" v-model="userType" value="user" required />
+              유저
+            </label>
+            <label class="user-type-label">
+              <input type="radio" v-model="userType" value="petsitter" required />
+              펫시터
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
           <label for="email">이메일 주소</label>
           <input id="email" name="email" type="email" v-model="email" required>
         </div>
@@ -69,16 +83,23 @@ export default defineComponent({
     const password = ref('');
     const name = ref('');
     const phone = ref('');
+    const userType = ref('user'); // 기본값으로 유저 선택
     const router = useRouter();
 
     const handleSignup = async () => {
       try {
+        // 회원가입 요청 URL 결정
+        const signupUrl = userType.value === 'petsitter' 
+          ? 'http://localhost:8080/api/v1/user/petsitter/register' 
+          : 'http://localhost:8080/api/v1/user/register';
+
         // 1. 회원가입 요청
-        const signupResponse = await axios.post('http://localhost:8080/api/v1/user/register', {
+        const signupResponse = await axios.post(signupUrl, {
           email: email.value,
           password: password.value,
           name: name.value,
-          phone: phone.value
+          phone: phone.value,
+          userType: userType.value // 회원 유형 추가
         });
 
         if (signupResponse.status === 200) {
@@ -110,6 +131,7 @@ export default defineComponent({
       password,
       name,
       phone,
+      userType, // 회원 유형 추가
       handleSignup
     };
   }
@@ -182,6 +204,23 @@ export default defineComponent({
   color: #555;
   margin-bottom: 0.8rem;
   font-weight: 500;
+}
+
+.user-type-options {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.user-type-label {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  color: #555;
+}
+
+.user-type-label input {
+  margin-right: 5px; /* 라디오 버튼과 텍스트 간격 */
 }
 
 .form-group input {
