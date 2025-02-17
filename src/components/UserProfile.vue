@@ -7,8 +7,8 @@
         
         <div class="button-container">
           <div class="left-buttons">
-            <button v-if="!isPetsitter" class="register-petsitter-btn" @click="showPetsitterModal = true">
-              펫시터 등록하기
+            <button v-if="isPetsitter" class="register-petsitter-btn" @click="showPetsitterModal = true">
+              펫시터 정보 등록하기
             </button>
           </div>
           <div>
@@ -30,15 +30,23 @@
           </div>
 
           <div class="form-group">
-            <label>이메일 주소</label>
-            <div class="info-field">{{ user.email }}</div>
+            <label>이메일</label>
+            <div class="info-field">
+              <span>{{ user.email }}</span>
+            </div>
           </div>
 
           <div class="form-group">
             <label>전화번호</label>
             <div class="info-field">
-              <input v-if="isEditing" v-model="editedUser.phone" class="form-input">
-              <span v-else>{{ user.phone }}</span>
+              <span>{{ user.phone }}</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>회원 유형</label>
+            <div class="info-field">
+              <span>{{ user.role }}</span>
             </div>
           </div>
 
@@ -238,13 +246,13 @@ export default {
         name: '',
         email: '',
         phone: '',
-        availablePetTypes: []
+        role: ''
       },
       editedUser: {
-        email: '',
         name: '',
+        email: '',
         phone: '',
-        availablePetTypes: []
+        role: ''
       },
       isEditing: false,
       showChangePasswordModal: false,
@@ -288,11 +296,8 @@ export default {
         });
         if (response.data) {
           this.user = response.data;
-          // 문자열로 된 availablePetTypes를 배열로 변환
-          if (typeof this.user.availablePetTypes === 'string') {
-            this.user.availablePetTypes = this.user.availablePetTypes.split(',').map(type => type.trim());
-          }
           this.editedUser = { ...this.user };
+          this.isPetsitter = this.user.role === 'petsitter';
         }
       } catch (error) {
         console.error('사용자 정보 조회 실패:', error);

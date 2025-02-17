@@ -116,7 +116,11 @@ export default defineComponent({
             localStorage.setItem('token', loginResponse.data.token);
             localStorage.setItem('userEmail', email.value);
             
-            // 4. 메인 페이지로 이동
+            // 4. 헤더 상태 업데이트
+            // Emit an event to update the header
+            window.dispatchEvent(new Event('user-logged-in'));
+
+            // 5. 메인 페이지로 이동
             router.push('/main');
           }
         }

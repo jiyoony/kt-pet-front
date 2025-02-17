@@ -18,21 +18,39 @@
           <button class="logout" @click="handleLogout">로그아웃</button>
         </div>
       </div>
-      <router-link to="/animal-code-manager">동물 코드 관리</router-link>
+      <router-link v-if="isLoggedIn && isAdmin" to="/animal-code-manager">동물 코드 관리</router-link>
+      <router-link v-if="isLoggedIn" to="/reservations">예약 목록 보기</router-link>
     </nav>
   </header>
 </template>
 
 <script>
 import axios from 'axios';
+import { ref } from 'vue';
 
 export default {
   name: 'Header',
-  data() {
+  setup() {
+    const userEmail = ref(localStorage.getItem('userEmail'));
+    const isLoggedIn = ref(!!userEmail.value);
+    const isAdmin = ref(localStorage.getItem('userRole') === 'admin');
+
+    const logout = () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userEmail');
+      localStorage.removeItem('userRole');
+      userEmail.value = null;
+      isLoggedIn.value = false;
+      isAdmin.value = false;
+      window.location.reload();
+    };
+
     return {
-      isLoggedIn: false,
-      userEmail: ''
-    }
+      userEmail,
+      isLoggedIn,
+      isAdmin,
+      logout
+    };
   },
   mounted() {
     this.checkLoginStatus();
@@ -51,17 +69,7 @@ export default {
       this.$router.push('/user-profile');
     },
     handleLogout() {
-      // 세션 로그아웃 요청
-      axios.post('http://localhost:8080/api/v1/user/logout', {}, {
-        withCredentials: true
-      }).then(() => {
-        localStorage.removeItem('userEmail');
-        this.isLoggedIn = false;
-        this.userEmail = '';
-        this.$router.push('/main');
-      }).catch(error => {
-        console.error('로그아웃 실패:', error);
-      });
+      this.logout();
     },
     checkLoginStatus() {
       const email = localStorage.getItem('userEmail');
@@ -129,7 +137,6 @@ export default {
   border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .login {
