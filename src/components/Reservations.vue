@@ -12,6 +12,7 @@
       <p>상태: {{ reservation.status }}</p>
       <p>가격: {{ reservation.price }}원</p>
       <p>위치: {{ reservation.location }}</p>
+      <button v-if="reservation.status === 'WAITING'" @click="acceptReservation(reservation.id)">수락</button>
     </div>
   </div>
 </template>
@@ -68,6 +69,32 @@ export default {
       }
     };
 
+    const acceptReservation = async (reservationId) => {
+      try {
+        const reservationToUpdate = reservations.value.find(res => res.id === reservationId);
+        const updatedReservation = {
+          userId: reservationToUpdate.userId,
+          petsitterId: reservationToUpdate.petsitterId,
+          startAt: reservationToUpdate.startAt,
+          endAt: reservationToUpdate.endAt,
+          status: 'CONFIRMED',
+          price: reservationToUpdate.price,
+          location: reservationToUpdate.location
+        };
+
+        const response = await axios.put(`http://localhost:8080/api/v1/reservations/${reservationId}`, updatedReservation, {
+          withCredentials: true
+        });
+
+        if (response.status === 200) {
+          fetchReservations(store.state.userRole);
+        }
+      } catch (error) {
+        console.error('예약 수락 실패:', error);
+        alert('예약 수락에 실패했습니다.');
+      }
+    };
+
     onMounted(() => {
       fetchUserInfo();
     });
@@ -75,7 +102,8 @@ export default {
     return {
       reservations,
       loading,
-      error
+      error,
+      acceptReservation
     };
   }
 }

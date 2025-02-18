@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 import App from './App.vue';
-import store from './store'; // Vuex 스토어 가져오기
+import store from './store'; // Import the Vuex store
 
 createApp(App)
-  .use(store) // Vuex 스토어 사용
+  .use(store) // Register the Vuex store
   .mount('#app'); 
