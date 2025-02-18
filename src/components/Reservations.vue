@@ -12,7 +12,9 @@
       <p>상태: {{ reservation.status }}</p>
       <p>가격: {{ reservation.price }}원</p>
       <p>위치: {{ reservation.location }}</p>
-      <button v-if="reservation.status === 'WAITING'" @click="handlePayment(reservation)">
+      <p>User Role: {{ userRole }}</p>
+      <p>Reservation Status: {{ reservation.status }}</p>
+      <button v-if="reservation.status === 'WAITING' && userRole === 'user'" @click="handlePayment(reservation)">
         결제하기
       </button>
     </div>
@@ -22,7 +24,7 @@
 <script>
 import axios from 'axios';
 import store from '@/store/index';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 
 export default {
   name: 'Reservations',
@@ -30,16 +32,16 @@ export default {
     const reservations = ref([]);
     const loading = ref(true);
     const error = ref(null);
-    const userRole = ref(store.state.userRole);
+    const userRole = ref('');
 
+    // 사용자 정보 가져오기
     const fetchUserInfo = async () => {
       try {
         const response = await axios.get('http://localhost:8080/api/v1/user/info', {
           withCredentials: true
         });
         console.log('response.data:', response.data);
-        store.commit('setUserRole', response.data.role);
-        console.log('response.data.role:', response.data.role);
+        userRole.value = response.data.role;
         fetchReservations(response.data.role);
       } catch (error) {
         console.error('사용자 정보 조회 실패:', error);
@@ -48,6 +50,7 @@ export default {
       }
     };
 
+    // 예약 정보 가져오기
     const fetchReservations = async (userRole) => {
       try {
         console.log('fetchUserInfo 실행됨');
@@ -72,6 +75,7 @@ export default {
       }
     };
 
+    // 결제 처리
     const handlePayment = (reservation) => {
       const { IMP } = window;
       IMP.init('imp88240507');
@@ -118,6 +122,13 @@ export default {
       }
     };
 
+    // userRole이 변경될 때마다 예약 목록 갱신
+    watch(userRole, (newRole) => {
+      if (newRole) {
+        fetchReservations(newRole);
+      }
+    });
+
     onMounted(() => {
       fetchUserInfo();
     });
@@ -131,6 +142,7 @@ export default {
     };
   }
 }
+
 </script>
 
 <style scoped>
