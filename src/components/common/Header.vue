@@ -67,12 +67,12 @@ export default {
       if (token && email) {
         isLoggedIn.value = true;
         userEmail.value = email;
-        isAdmin.value = store.state.userRole === 'admin'; // Check if the user is an admin
+        isAdmin.value = store.state.userRole === 'admin'; // 관리자 여부 확인
       }
     };
 
     onMounted(() => {
-      checkLoginStatus(); // Call the method on mount
+      checkLoginStatus(); // 컴포넌트가 마운트될 때 상태 확인
     });
 
     return {

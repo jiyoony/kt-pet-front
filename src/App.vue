@@ -6,9 +6,9 @@ import Footer from './components/common/Footer.vue'
 const headerRef = ref(null)
 
 const handleLoginSuccess = () => {
-  // Call the checkLoginStatus method on the Header component
+  // 헤더 컴포넌트의 checkLoginStatus 메서드 호출
   if (headerRef.value) {
-    headerRef.value.checkLoginStatus(); // Ensure this method exists
+    headerRef.value.checkLoginStatus(); // 상태 업데이트
   }
 }
 </script>

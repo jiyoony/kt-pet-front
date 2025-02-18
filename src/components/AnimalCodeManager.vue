@@ -27,9 +27,9 @@
       </tbody>
     </table>
 
-    <Modal v-if="showAddModal" :show="showAddModal" @close="showAddModal = false">
+    <Modal v-if="showAddModal" @close="showAddModal = false">
       <template #header>
-        <h2>동물 코드 추가</h2>
+        <h2>동물 추가</h2>
       </template>
       <template #body>
         <form @submit.prevent="addAnimal">
@@ -41,7 +41,7 @@
       </template>
     </Modal>
 
-    <Modal v-if="showEditModal" :show="showEditModal" @close="showEditModal = false">
+    <Modal v-if="showEditModal" @close="showEditModal = false">
       <template #header>
         <h2>동물 코드 수정</h2>
       </template>
@@ -60,7 +60,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import Modal from './Modal.vue'; // 모달 컴포넌트 import
+import Modal from './Modal.vue'; // Ensure the modal component is imported
 
 const animalCodes = ref([]);
 const showAddModal = ref(false);
@@ -85,17 +85,24 @@ const addAnimal = async () => {
       subCategory: newAnimal.value.subCategory
     };
     
-    await axios.post('http://localhost:8080/api/v1/animal-codes', animalCodeRequestDto);
-    newAnimal.value = { code: '', mainCategory: '', subCategory: '' }; // 초기화
-    showAddModal.value = false;
-    await fetchAnimalCodes(); // 목록 갱신
+    // Send POST request to add the animal code
+    const response = await axios.post('http://localhost:8080/api/v1/animal-codes', animalCodeRequestDto);
+    
+    // Check the response status
+    if (response.status === 201) {
+      console.log('Animal code added successfully:', response.data);
+      // Reset the form after adding
+      newAnimal.value = { code: '', mainCategory: '', subCategory: '' }; // Reset form
+      showAddModal.value = false; // Close the modal
+      await fetchAnimalCodes(); // Refresh the list
+    }
   } catch (error) {
     console.error('동물 코드 추가 실패:', error);
   }
 };
 
 const editAnimal = (animal) => {
-  editAnimalData.value = { ...animal }; // 수정할 동물 코드 데이터 설정
+  editAnimalData.value = { ...animal }; // Set the data for the animal to be edited
   showEditModal.value = true;
 };
 
@@ -103,7 +110,7 @@ const updateAnimal = async () => {
   try {
     await axios.put(`http://localhost:8080/api/v1/animal-codes/${editAnimalData.value.id}`, editAnimalData.value);
     showEditModal.value = false;
-    await fetchAnimalCodes(); // 목록 갱신
+    await fetchAnimalCodes(); // Refresh the list
   } catch (error) {
     console.error('동물 코드 수정 실패:', error);
   }
@@ -112,13 +119,15 @@ const updateAnimal = async () => {
 const deleteAnimal = async (id) => {
   try {
     await axios.delete(`http://localhost:8080/api/v1/animal-codes/${id}`);
-    await fetchAnimalCodes(); // 목록 갱신
+    await fetchAnimalCodes(); // Refresh the list
   } catch (error) {
     console.error('동물 코드 삭제 실패:', error);
   }
 };
 
-onMounted(fetchAnimalCodes);
+onMounted(() => {
+  fetchAnimalCodes(); // Fetch animal codes on component mount
+});
 </script>
 
 <style scoped>
