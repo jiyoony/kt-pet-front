@@ -12,7 +12,9 @@
       <p>상태: {{ reservation.status }}</p>
       <p>가격: {{ reservation.price }}원</p>
       <p>위치: {{ reservation.location }}</p>
-      <!-- <button v-if="reservation.status === 'WAITING'" @click="acceptReservation(reservation.id)">수락</button> -->
+      <button v-if="reservation.status === 'WAITING'" @click="handlePayment(reservation)">
+        결제하기
+      </button>
     </div>
   </div>
 </template>
@@ -28,6 +30,7 @@ export default {
     const reservations = ref([]);
     const loading = ref(true);
     const error = ref(null);
+    const userRole = ref(store.state.userRole);
 
     const fetchUserInfo = async () => {
       try {
@@ -69,29 +72,49 @@ export default {
       }
     };
 
-    const acceptReservation = async (reservationId) => {
+    const handlePayment = (reservation) => {
+      const { IMP } = window;
+      IMP.init('imp88240507');
+
+      const data = {
+        pg: 'html5_inicis',
+        pay_method: 'card',
+        merchant_uid: `mid_${new Date().getTime()}`,
+        amount: reservation.price,
+        name: '아임포트 결제 데이터 분석',
+        buyer_name: '홍길동',
+        buyer_tel: '01012341234',
+        buyer_email: 'jychae615@gmail.com',
+        buyer_addr: '신사동 661-16',
+        buyer_postcode: '06018'
+      };
+
+      IMP.request_pay(data, (response) => callback(response, reservation.id));
+    };
+
+    const callback = async (response, reservationId) => {
+      const { success, merchant_uid, error_msg } = response;
+      console.log(response);
+      if (success) {
+        alert('결제 성공');
+        await sendPaymentInfo(reservationId, merchant_uid);
+      } else {
+        alert(`결제 실패: ${error_msg}`);
+      }
+    };
+
+    const sendPaymentInfo = async (reservationId, paymentId) => {
+      const paymentData = {
+        paymentDate: new Date(),
+        reservationId: reservationId,
+        paymentId: paymentId
+      };
+
       try {
-        const reservationToUpdate = reservations.value.find(res => res.id === reservationId);
-        const updatedReservation = {
-          userId: reservationToUpdate.userId,
-          petsitterId: reservationToUpdate.petsitterId,
-          startAt: reservationToUpdate.startAt,
-          endAt: reservationToUpdate.endAt,
-          status: 'CONFIRMED',
-          price: reservationToUpdate.price,
-          location: reservationToUpdate.location
-        };
-
-        const response = await axios.put(`http://localhost:8080/api/v1/reservations/${reservationId}`, updatedReservation, {
-          withCredentials: true
-        });
-
-        if (response.status === 200) {
-          fetchReservations(store.state.userRole);
-        }
+        const response = await axios.post('http://localhost:8080/api/payments', paymentData);
+        console.log('Payment information saved successfully:', response.data);
       } catch (error) {
-        console.error('예약 수락 실패:', error);
-        alert('예약 수락에 실패했습니다.');
+        console.error('Failed to save payment information:', error);
       }
     };
 
@@ -103,7 +126,8 @@ export default {
       reservations,
       loading,
       error,
-      acceptReservation
+      userRole,
+      handlePayment
     };
   }
 }
@@ -136,11 +160,9 @@ export default {
 }
 
 .reservation-card {
-  background-color: #f9f9f9;
   border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
+  padding: 10px;
+  margin-bottom: 10px;
   color: black;
 }
 </style> 
