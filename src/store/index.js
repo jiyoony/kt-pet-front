@@ -2,22 +2,29 @@ import { createStore } from 'vuex';
 
 const store = createStore({
   state: {
-    userRole: null, // Initial value
-    // 다른 상태...
+    userRole: null,  // 로그인 상태에서 관리하는 사용자 역할
   },
   mutations: {
     setUserRole(state, role) {
-      state.userRole = role; // Set the user role
-      console.log('Mutation: User Role Set to', role); // Log the role being set
+      state.userRole = role;
     },
-    // 다른 뮤테이션...
+    clearUserRole(state) {
+      state.userRole = null;
+    },
   },
   actions: {
-    // Define actions if needed
+    login({ commit }, role) {
+      commit('setUserRole', role);
+    },
+    logout({ commit }) {
+      commit('clearUserRole');
+    }
   },
   getters: {
-    // Define getters if needed
+    getUserRole(state) {
+      return state.userRole;
+    }
   }
 });
 
-export default store; 
+export default store;
