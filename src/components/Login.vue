@@ -48,9 +48,8 @@
 import { defineComponent, ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
-import Header from '@/components/common/Header.vue';
+import store from '@/store/index';
 
-declare const window: Window & typeof globalThis;
 
 export default defineComponent({
   name: 'Login',
@@ -79,8 +78,12 @@ export default defineComponent({
           withCredentials: true
         });
 
+        console.log('Login Response:', response);
+
         if (response.status === 200) {
           localStorage.setItem('userEmail', email.value);
+          store.commit('setUserRole', response.data.role);
+          console.log('User Role Set:', response.data.role);
           emit('login-success');
           await router.push('/main');
         }

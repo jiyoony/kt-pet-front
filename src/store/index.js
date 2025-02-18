@@ -2,20 +2,21 @@ import { createStore } from 'vuex';
 
 const store = createStore({
   state: {
-    userRole: null, // 초기값 설정
+    userRole: null, // Initial value
     // 다른 상태...
   },
   mutations: {
     setUserRole(state, role) {
-      state.userRole = role; // 역할 설정
+      state.userRole = role; // Set the user role
+      console.log('Mutation: User Role Set to', role); // Log the role being set
     },
     // 다른 뮤테이션...
   },
   actions: {
-    // 액션...
+    // Define actions if needed
   },
   getters: {
-    // 게터...
+    // Define getters if needed
   }
 });
 

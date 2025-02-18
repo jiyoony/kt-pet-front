@@ -15,79 +15,77 @@
         <div v-else class="user-info">
           <span class="user-email" @click="goToProfile">{{ userEmail }}</span>
           <button class="mypage" @click="goToProfile">마이페이지</button>
-          <button class="logout" @click="handleLogout">로그아웃</button>
+          <button class="logout" @click="logout">로그아웃</button>
         </div>
       </div>
+      <router-link v-if="isLoggedIn && !isAdmin" to="/reservations">예약 목록 보기</router-link>
       <router-link v-if="isLoggedIn && isAdmin" to="/animal-code-manager">동물 코드 관리</router-link>
-      <router-link v-if="isLoggedIn" to="/reservations">예약 목록 보기</router-link>
     </nav>
   </header>
 </template>
 
 <script>
-import axios from 'axios';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import store from '@/store/index';
 
 export default {
   name: 'Header',
   setup() {
     const userEmail = ref(localStorage.getItem('userEmail'));
+    const router = useRouter();
     const isLoggedIn = ref(!!userEmail.value);
-    const isAdmin = ref(localStorage.getItem('userRole') == 'admin');
-    console.log(isAdmin);
+    const isAdmin = ref(store.state.userRole === 'admin');
+
     const logout = () => {
       localStorage.removeItem('token');
       localStorage.removeItem('userEmail');
-      localStorage.removeItem('userRole');
       userEmail.value = null;
       isLoggedIn.value = false;
-      isAdmin.value = false;
       window.location.reload();
     };
+
+    const goToMain = () => {
+      router.push('/');
+    };
+
+    const goToLogin = () => {
+      router.push('/login');
+    };
+
+    const goToSignup = () => {
+      router.push('/signup');
+    };
+
+    const goToProfile = () => {
+      router.push('/user-profile');
+    };
+
+    const checkLoginStatus = () => {
+      const token = localStorage.getItem('token');
+      const email = localStorage.getItem('userEmail');
+      if (token && email) {
+        isLoggedIn.value = true;
+        userEmail.value = email;
+        isAdmin.value = store.state.userRole === 'admin'; // Check if the user is an admin
+      }
+    };
+
+    onMounted(() => {
+      checkLoginStatus(); // Call the method on mount
+    });
 
     return {
       userEmail,
       isLoggedIn,
       isAdmin,
-      logout
+      logout,
+      goToMain,
+      goToLogin,
+      goToSignup,
+      goToProfile,
+      checkLoginStatus
     };
-  },
-  mounted() {
-    this.checkLoginStatus();
-  },
-  methods: {
-    goToMain() {
-      this.$router.push('/main');
-    },
-    goToLogin() {
-      this.$router.push('/login');
-    },
-    goToSignup() {
-      this.$router.push('/signup');
-    },
-    goToProfile() {
-      this.$router.push('/user-profile');
-    },
-    handleLogout() {
-      this.logout();
-    },
-    checkLoginStatus() {
-      const email = localStorage.getItem('userEmail');
-      if (email) {
-        // 세션 상태 확인
-        axios.get('http://localhost:8080/api/v1/user/check-login', {
-          withCredentials: true
-        }).then(() => {
-          this.isLoggedIn = true;
-          this.userEmail = email;
-        }).catch(() => {
-          // 세션이 없으면 로컬 스토리지도 클리어
-          this.isLoggedIn = false;
-          this.userEmail = '';
-          localStorage.removeItem('userEmail');
-        });
-      }
-    }
   }
 }
 </script>
