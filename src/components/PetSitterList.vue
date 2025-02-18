@@ -53,7 +53,7 @@ export default {
         petsitterId: null,
         startAt: '',
         endAt: '',
-        status: "Waiting", // 예약 상태
+        status: "WAITING", // 예약 상태
         price: 0, // 실제 가격으로 변경해야 함
         location: "Seoul" // 실제 위치로 변경해야 함
       }

@@ -12,7 +12,7 @@
       <p>상태: {{ reservation.status }}</p>
       <p>가격: {{ reservation.price }}원</p>
       <p>위치: {{ reservation.location }}</p>
-      <button v-if="reservation.status === 'WAITING'" @click="acceptReservation(reservation.id)">수락</button>
+      <!-- <button v-if="reservation.status === 'WAITING'" @click="acceptReservation(reservation.id)">수락</button> -->
     </div>
   </div>
 </template>
