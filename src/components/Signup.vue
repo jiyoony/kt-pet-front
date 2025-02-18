@@ -65,43 +65,12 @@
 import { defineComponent, ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import store from '../store'; // Import the store
 
 declare const alert: (message: string) => void;
 
 export default defineComponent({
   name: 'Signup',
-  methods: {
-    goToLogin() {
-      this.$router.push('/login');
-    },
-    goToMain() {
-      this.$router.push('/main');
-    },
-    async fetchReservations() {
-      try {
-        const userRole = this.$store.state.userRole; // 사용자 역할 가져오기
-        let url = '';
-
-        if (userRole === 'petsitter') {
-          url = 'http://localhost:8080/api/v1/reservations/petsitter'; // 펫시터 역할일 때
-        } else {
-          url = 'http://localhost:8080/api/v1/reservations'; // 일반 사용자 역할일 때
-        }
-        console.log(`Fetching reservations from: ${url}`); // 추가된 로그
-
-        const response = await axios.get(url, {
-          withCredentials: true
-        });
-        console.log('Response data:', response.data); // 응답 데이터 로그
-        this.reservations = response.data;
-      } catch (err) {
-        this.error = '예약 정보를 가져오는 데 실패했습니다.';
-        console.error(err);
-      } finally {
-        this.loading = false;
-      }
-    }
-  },
   setup() {
     const email = ref('');
     const password = ref('');
@@ -141,14 +110,15 @@ export default defineComponent({
             localStorage.setItem('userEmail', email.value);
             
             // 4. 헤더 상태 업데이트
-            // Emit an event to update the header
-            window.dispatchEvent(new Event('user-logged-in'));
+            window.dispatchEvent(new Event('user-logged-in')); // Emit an event to update the header
 
             // 5. 메인 페이지로 이동
             router.push('/main');
 
             // 로그인 성공 후
-            this.$store.commit('setUserRole', loginResponse.data.role); // 사용자 역할 설정
+            store.commit('setUserRole', loginResponse.data.role); // 사용자 역할 설정
+          } else {
+            alert('로그인에 실패했습니다. 다시 시도해주세요.'); // 로그인 실패 처리
           }
         }
       } catch (error) {
@@ -163,7 +133,9 @@ export default defineComponent({
       name,
       phone,
       userType, // 회원 유형 추가
-      handleSignup
+      handleSignup,
+      goToLogin: () => router.push('/login'),
+      goToMain: () => router.push('/main')
     };
   }
 });
